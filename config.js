@@ -1,0 +1,141 @@
+var config = {
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    showMarkers: true,
+    markerColor: '#3FB1CE',
+    inset: true,
+    theme: 'light',
+    chapterReturn: true,
+    title: 'Philly Community Wireless',
+    logo: '',
+    subtitle: 'Internet for the people by the people',
+    byline: '',
+    mobileview: '<div id="rotate-mobile"><em>For the best viewing experience on mobile, rotate your device horizontally.</em><br><br><img src="images/device.png"></div>',
+    footer: 'Philly Community Wireless<br>Created using <a href="https://github.com/digidem/maplibre-storymap" target="_blank">MapLibre Storytelling</a> template.',
+    chapters: [
+        {
+            id: 'intro',
+            alignment: 'center',
+            title: 'Building a Community Wifi Network in North Philadelphia',
+            image: './images/rooftop_antenna.jpg',
+            description: 'Philly Community Wireless is building a community-owned wireless network in the North Philadelphia neighborhood of Norris Square.',
+            location: {
+                center: [-75.14770, 39.98100],
+                zoom: 11.50,
+                pitch: 30.00,
+                bearing: 0.00
+            }
+        },
+        {
+            id: 'how-it-works',
+            title: 'How does it work?',
+            image: './images/mounting_antenna.jpg',
+            description: 'We often get questions about how the network is built. This scrollytelling map will walk you through how our wireless mesh network functions, and what happens when you access the internet on our network.',
+            location: {
+                center: [-75.13450, 39.98350],
+                zoom: 14.50,
+                pitch: 30.00,
+                bearing: 10.00
+            }
+        },
+        {
+            id: 'nsnp-access-point',
+            title: 'A local access point at the Norris Square Neighborhood Project Main Building',
+            image: './images/nsnp.jpg',
+            description: 'Here you see a directional antenna mounted on the outside facade of our community partner, Norris Square Neighborhood Projects. This device broadcasts wifi into Norris Square Park. If you were to log in, your device would reach the internet by connecting to it. This device is connected to a router and a radio antenna on the roof, known as a Litebeam.',
+            location: {
+                center: [-75.13358, 39.98294],
+                zoom: 17.50,
+                pitch: 55.00,
+                bearing: 40.00
+            }
+        },
+        {
+            id: 'las-parcelas',
+            title: 'Las Parcelas',
+            image: './images/las_parcelas.jpg',
+            description: "At the Norris Square Neighborhood Project's Las Parcelas gardens, we've installed an antenna visible in line of sight from the Gotham Tower. In this image, you can see the access point broadcasting wifi, and behind it, the radio antenna pointed to PhillyWisper's supernode at Gotham Tower.",
+            location: {
+                center: [-75.13587, 39.98497],
+                zoom: 17.50,
+                pitch: 45.00,
+                bearing: -20.00
+            }
+        },
+        {
+            id: 'antenna-detail',
+            alignment: 'left',
+            title: 'Antenna Detail',
+            image: './images/antenna_detail.png',
+            description: 'Here you can see the antenna and the source tower clearly marked.',
+            mapAnimation: 'easeTo',
+            location: {
+                center: [-75.13560, 39.98480],
+                zoom: 18.00,
+                pitch: 60.00,
+                bearing: -160.00
+            }
+        },
+        {
+            id: 'supernode',
+            title: 'The supernode',
+            image: './images/gotham.png',
+            description: 'The Gotham Tower highsite southwest of Norris Square Park has a series of sector antennas broadcasting wireless radio signals in every direction. These sector antennas, point to multipoint radios, connect to the Litebeam on the roof of local residences and organizations.',
+            rotateAnimation: true,
+            location: {
+                center: [-75.13713, 39.98152],
+                zoom: 15.50,
+                pitch: 55.00,
+                bearing: -25.00
+            }
+        },
+        {
+            id: 'datacenter',
+            title: 'The datacenter',
+            image: './images/datacenter.jpg',
+            description: 'Gotham Tower also has radios connecting it to the Data center at 401 N Broad, which acts as the gateway out to the cloud or internet more broadly.',
+            location: {
+                center: [-75.16105, 39.95982],
+                zoom: 15.50,
+                pitch: 50.00,
+                bearing: 20.00
+            }
+        },
+        {
+            id: 'line-of-sight',
+            title: 'Line of Sight',
+            image: './images/los.png',
+            description: 'One problem that often arises is we cannot get Line of Sight between a residential house and Gotham tower. To address this problem, we can take advantage of the mesh capabilities of our wifi network. For example, buildings that are too close to Gotham Tower or below a taller building, cannot get direct access from the supernode to the internet.',
+            location: {
+                center: [-75.13620, 39.98200],
+                zoom: 16.00,
+                pitch: 50.00,
+                bearing: -45.00
+            }
+        },
+        {
+            id: 'wireless-meshing',
+            title: 'Wireless Meshing',
+            image: './images/los.png',
+            description: 'We often relay signal from a local residential hub, to another location using wireless meshing. For example, we mounted an omnidirectional antenna on the top of a residential rowhouse, with the omni wired via ethernet directly to the Litebeam pointing at Gotham. Then from a neighboring community organization, GALAEI, we pointed a directional antenna towards the hub omni, and ran a cable inside the building to provide the organization with wifi.',
+            location: {
+                center: [-75.13489, 39.98369],
+                zoom: 17.50,
+                pitch: 45.00,
+                bearing: 30.00
+            }
+        },
+        {
+            id: 'rooftop-installs',
+            alignment: 'center',
+            title: 'Installing Antennas on Rooftops',
+            image: './images/rooftop.jpg',
+            description: 'We are currently looking for homeowners who would allow us to install an antenna to relay signal from Gotham Tower. If you are interested in helping us grow the network, please reach out and we can work with you to figure out how we can grow a public wifi network in your neighborhood.',
+            location: {
+                center: [-75.13500, 39.98350],
+                zoom: 13.50,
+                pitch: 20.00,
+                bearing: 0.00
+            }
+        }
+    ]
+};

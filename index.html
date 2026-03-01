@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Philly Community Wireless Story Map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="./dist/bundle.js"></script>
+    <link href='./dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        :root {
+            --card-bg: linear-gradient(135deg, rgba(235, 238, 255, 0.96), rgba(224, 232, 255, 0.88));
+            --card-border: rgba(65, 86, 140, 0.18);
+            --card-shadow: 0 10px 28px rgba(22, 35, 66, 0.18);
+            --header-bg: linear-gradient(135deg, rgba(88, 78, 160, 0.78), rgba(68, 62, 130, 0.7));
+            --header-border: rgba(200, 190, 255, 0.28);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        a,
+        a:hover,
+        a:visited {
+            color: #0071bc;
+        }
+
+        #map {
+            top: 0;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            filter: brightness(1.6) contrast(0.95);
+        }
+
+        #mapInset {
+            bottom: 50px;
+            right: 30px;
+            height: 180px;
+            width: 250px;
+            max-width: 100%;
+            position: fixed;
+            z-index: 4;
+            opacity: 1;
+            border: 1px solid rgba(88, 98, 140, 0.4);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 26px rgba(20, 28, 48, 0.22);
+            border-radius: 14px;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        #header {
+            margin: 3vh auto;
+            width: 60vw;
+            padding: 2vh;
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            background: var(--header-bg);
+            border-radius: 25px;
+            border: 1px solid var(--header-border);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        #header h1,
+        #header h2,
+        #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+        }
+
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            position: relative;
+            z-index: 5;
+        }
+
+        #footer p {
+            padding: 0 10rem;
+        }
+
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+
+        .light {
+            color: #0f172a;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        .step {
+            padding-bottom: 50vh;
+            opacity: 0.25;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .step.active {
+            opacity: 0.95;
+        }
+
+        .step div {
+            padding: 25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+            border-radius: 25px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        .step h3 {
+            font-family: "Fraunces", Georgia, serif;
+            font-size: 2em;
+            line-height: 1.3em;
+        }
+
+        .step p {
+            font-size: 1.2em;
+            line-height: 1.6em;
+        }
+
+        .step div a {
+            color: inherit;
+            text-decoration-thickness: 2px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        #rotate-mobile {
+            display: none;
+        }
+
+        .maplibregl-ctrl {
+            margin-right: 30px !important;
+        }
+
+        .maplibregl-popup {
+            font: 12px/20px 'Montserrat', Helvetica, sans-serif;
+        }
+
+        @media (max-width: 750px) {
+            #features {
+                width: 90vw;
+                margin: 0 auto;
+            }
+
+            #header {
+                width: 80vw;
+            }
+
+            #header img {
+                width: 80vw;
+            }
+
+            #header h1 {
+                font-family: 'Roboto', 'Open Sans', 'Verdana', sans-serif;
+                font-size: 1.9rem;
+                text-transform: uppercase;
+            }
+
+            .lefty {
+                width: 90%;
+            }
+
+            .step div {
+                padding: 5px 15px;
+            }
+
+            .step div h3 {
+                font-family: 'Lora', 'Georgia', serif;
+                font-size: 1.5rem;
+                font-weight: 1000;
+            }
+
+            #footer p {
+                padding: 0;
+            }
+
+            #rotate-mobile {
+                display: inline-block;
+                margin-top: 25px;
+            }
+
+            .centered,
+            .lefty,
+            .righty,
+            .fully {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks */
+        .maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan,
+        .maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan .maplibregl-canvas {
+            touch-action: unset;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+    <div id="mapInset"></div>
+    <div id="story"></div>
+    <script src="./config.js"></script>
+    <script>
+        // Chapter defaults -- only override these in config.js when needed
+        var chapterDefaults = {
+            alignment: 'right',
+            hidden: false,
+            mapAnimation: 'flyTo',
+            rotateAnimation: false,
+            mapInteractive: false,
+            onChapterEnter: [],
+            onChapterExit: []
+        };
+        config.chapters = config.chapters.map(function (ch) {
+            return Object.assign({}, chapterDefaults, ch);
+        });
+
+        // Build a lookup map for O(1) chapter access in scroll handlers
+        var chapterMap = {};
+        config.chapters.forEach(function (ch) { chapterMap[ch.id] = ch; });
+
+        var alignments = {
+            'left': 'lefty',
+            'center': 'centered',
+            'right': 'righty',
+            'full': 'fully'
+        };
+
+        var layerTypes = {
+            'fill': ['fill-opacity'],
+            'line': ['line-opacity'],
+            'circle': ['circle-opacity', 'circle-stroke-opacity'],
+            'symbol': ['icon-opacity', 'text-opacity'],
+            'raster': ['raster-opacity'],
+            'fill-extrusion': ['fill-extrusion-opacity'],
+            'heatmap': ['heatmap-opacity']
+        };
+
+        function setLayerOpacity(layer) {
+            var layerType = map.getLayer(layer.layer).type;
+            var paintProps = layerTypes[layerType];
+            paintProps.forEach(function (prop) {
+                var options = {};
+                if (layer.duration) {
+                    options = { "duration": layer.duration };
+                    map.setPaintProperty(layer.layer, prop + "-transition", options);
+                }
+                map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+            });
+        }
+
+        // Build the story DOM
+        var storyEl = document.getElementById('story');
+        var features = document.createElement('div');
+        features.setAttribute('id', 'features');
+
+        var header = document.createElement('div');
+
+        if (config.title) {
+            var titleText = document.createElement('h1');
+            titleText.innerText = config.title;
+            header.appendChild(titleText);
+        }
+
+        if (config.logo) {
+            var image = new Image();
+            image.src = config.logo;
+            image.loading = 'lazy';
+            image.decoding = 'async';
+            header.appendChild(image);
+        }
+
+        if (config.subtitle) {
+            var subtitleText = document.createElement('h2');
+            subtitleText.innerText = config.subtitle;
+            header.appendChild(subtitleText);
+        }
+
+        if (config.byline) {
+            var bylineText = document.createElement('p');
+            bylineText.innerText = config.byline;
+            header.appendChild(bylineText);
+        }
+
+        if (header.innerText.length > 0) {
+            header.classList.add(config.theme);
+            header.setAttribute('id', 'header');
+            storyEl.appendChild(header);
+        }
+
+        config.chapters.forEach(function (record, idx) {
+            var container = document.createElement('div');
+            var chapter = document.createElement('div');
+
+            if (record.title) {
+                var title = document.createElement('h3');
+                title.innerText = record.title;
+                chapter.appendChild(title);
+            }
+
+            if (record.image) {
+                var img = new Image();
+                img.src = record.image;
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                chapter.appendChild(img);
+            }
+
+            if (record.caption) {
+                var caption = document.createElement('p');
+                caption.setAttribute("class", "caption");
+                caption.innerHTML = '<em>' + record.caption + '</em>';
+                chapter.appendChild(caption);
+            }
+
+            if (record.description) {
+                var desc = document.createElement('p');
+                desc.innerHTML = record.description;
+                chapter.appendChild(desc);
+
+                if (config.chapterReturn) {
+                    var returnTop = document.createElement('p');
+                    returnTop.setAttribute("class", "returntop");
+                    returnTop.innerHTML = '<a href="#header">Back to top</a>';
+                    chapter.appendChild(returnTop);
+                }
+            }
+
+            container.setAttribute('id', record.id);
+            container.classList.add('step');
+            if (idx === 0) {
+                container.classList.add('active');
+            }
+
+            chapter.classList.add(config.theme);
+            container.appendChild(chapter);
+            container.classList.add(alignments[record.alignment] || 'centered');
+            if (record.hidden) {
+                container.classList.add('hidden');
+            }
+            features.appendChild(container);
+        });
+
+        storyEl.appendChild(features);
+
+        // Add mobile rotation prompt
+        if (config.mobileview) {
+            var mobileText = document.createElement('p');
+            mobileText.innerHTML = config.mobileview;
+            header.appendChild(mobileText);
+        }
+
+        var footer = document.createElement('div');
+        if (config.footer) {
+            var footerText = document.createElement('p');
+            footerText.innerHTML = config.footer;
+            footer.appendChild(footerText);
+        }
+
+        if (footer.innerText.length > 0) {
+            footer.classList.add(config.theme);
+            footer.setAttribute('id', 'footer');
+            storyEl.appendChild(footer);
+        }
+
+        // Initialize map
+        var map = new maplibregl.Map({
+            container: 'map',
+            style: config.style,
+            center: config.chapters[0].location.center,
+            zoom: config.chapters[0].location.zoom,
+            bearing: config.chapters[0].location.bearing,
+            pitch: config.chapters[0].location.pitch,
+            interactive: true,
+            dragPan: false,
+            dragRotate: false,
+            doubleClickZoom: false,
+            scrollZoom: false,
+            touchZoomRotate: false,
+            maplibreLogo: false,
+            attributionControl: false
+        });
+
+        // Inset map
+        var initLoad = true;
+        if (config.inset) {
+            var insetMap = new maplibregl.Map({
+                container: 'mapInset',
+                style: config.style,
+                center: config.chapters[0].location.center,
+                zoom: 11,
+                hash: false,
+                interactive: false,
+                attributionControl: false,
+            });
+        }
+
+        if (config.showMarkers) {
+            var marker = new maplibregl.Marker({ color: config.markerColor });
+            marker.setLngLat(config.chapters[0].location.center).addTo(map);
+        }
+
+        // Navigation control for interactive chapters
+        var navigation = new maplibregl.NavigationControl();
+
+        var scroller = scrollama();
+
+        map.on("load", function () {
+            // Add 3D building extrusions
+            var layers = map.getStyle().layers;
+            var labelLayer;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+                    labelLayer = layers[i].id;
+                    break;
+                }
+            }
+            map.addLayer({
+                'id': '3d-buildings',
+                'source': 'carto',
+                'source-layer': 'building',
+                'type': 'fill-extrusion',
+                'minzoom': 14,
+                'paint': {
+                    'fill-extrusion-color': '#8090a0',
+                    'fill-extrusion-height': ['*', ['get', 'render_height'], 1.8],
+                    'fill-extrusion-base': 0,
+                    'fill-extrusion-opacity': 0.85
+                }
+            }, labelLayer);
+
+            map.setLight({
+                anchor: 'viewport',
+                color: '#fffaf0',
+                intensity: 0.5,
+                position: [1.5, 45, 80]
+            });
+
+            // Inset map bounds tracking
+            if (config.inset) {
+                map.on('move', getInsetBounds);
+                getInsetBounds();
+            }
+
+            // Scrollama setup
+            scroller
+                .setup({
+                    step: '.step',
+                    offset: 0.5,
+                    progress: true
+                })
+                .onStepEnter(function (response) {
+                    var chapter = chapterMap[response.element.id];
+
+                    response.element.classList.add('active');
+                    map[chapter.mapAnimation || 'flyTo'](chapter.location);
+
+                    if (config.inset) {
+                        insetMap.flyTo({ center: chapter.location.center, zoom: 11 });
+                    }
+                    if (config.showMarkers) {
+                        marker.setLngLat(chapter.location.center);
+                    }
+                    if (chapter.onChapterEnter.length > 0) {
+                        chapter.onChapterEnter.forEach(setLayerOpacity);
+                    }
+
+                    // Interactive chapter controls
+                    if (chapter.mapInteractive) {
+                        if (!map.hasControl(navigation)) {
+                            map.addControl(navigation);
+                        }
+                        map.dragPan.enable();
+                        map.doubleClickZoom.enable();
+                        map.getCanvas().style.cursor = 'grab';
+                    } else {
+                        if (map.hasControl(navigation)) {
+                            map.removeControl(navigation);
+                        }
+                        map.dragPan.disable();
+                        map.doubleClickZoom.disable();
+                        map.getCanvas().style.cursor = 'default';
+                    }
+
+                    if (chapter.rotateAnimation) {
+                        map.once('moveend', function () {
+                            var rotateNumber = map.getBearing();
+                            map.rotateTo(rotateNumber + 180, {
+                                duration: 30000,
+                                easing: function (t) { return t; }
+                            });
+                        });
+                    }
+                })
+                .onStepExit(function (response) {
+                    var chapter = chapterMap[response.element.id];
+                    response.element.classList.remove('active');
+                    if (chapter.onChapterExit.length > 0) {
+                        chapter.onChapterExit.forEach(setLayerOpacity);
+                    }
+                });
+        });
+
+        // Inset map helpers -- reuse a single GeoJSON object
+        var boundsJson = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[
+                        [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]
+                    ]]
+                }
+            }]
+        };
+
+        function getInsetBounds() {
+            var bounds = map.getBounds();
+            var coords = boundsJson.features[0].geometry.coordinates[0];
+            coords[0][0] = coords[3][0] = coords[4][0] = bounds._sw.lng;
+            coords[0][1] = coords[1][1] = coords._sw ? bounds._sw.lat : bounds._sw.lat;
+            coords[1][0] = coords[2][0] = bounds._ne.lng;
+            coords[2][1] = coords[3][1] = bounds._ne.lat;
+            coords[0][1] = coords[1][1] = coords[4][1] = bounds._sw.lat;
+
+            if (initLoad) {
+                insetMap.addSource('boundsSource', {
+                    'type': 'geojson',
+                    'data': boundsJson
+                });
+                insetMap.addLayer({
+                    'id': 'boundsLayer',
+                    'type': 'fill',
+                    'source': 'boundsSource',
+                    'paint': {
+                        'fill-color': '#fff',
+                        'fill-opacity': 0.2
+                    }
+                });
+                insetMap.addLayer({
+                    'id': 'outlineLayer',
+                    'type': 'line',
+                    'source': 'boundsSource',
+                    'paint': {
+                        'line-color': '#000',
+                        'line-width': 1
+                    }
+                });
+                initLoad = false;
+            } else {
+                insetMap.getSource('boundsSource').setData(boundsJson);
+            }
+        }
+
+        window.addEventListener('resize', scroller.resize);
+
+    </script>
+
+</body>
+</html>
