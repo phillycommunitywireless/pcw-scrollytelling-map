@@ -51,6 +51,7 @@
             background: rgba(255, 255, 255, 0.6);
             box-shadow: 0 12px 26px rgba(20, 28, 48, 0.22);
             border-radius: 14px;
+            overflow: hidden; /* clip the map canvas to the rounded corners */
             transition: opacity 0.5s ease-in-out;
             pointer-events: none;
         }
@@ -180,6 +181,11 @@
         }
 
         @media (max-width: 750px) {
+            /* The inset overlaps the story cards on small screens -- hide it */
+            #mapInset {
+                display: none;
+            }
+
             #features {
                 width: 90vw;
                 margin: 0 auto;
@@ -245,6 +251,7 @@
     <div id="mapInset"></div>
     <div id="story"></div>
     <script src="./config.js"></script>
+    <script src="./sources.js"></script>
     <script>
         // Chapter defaults -- only override these in config.js when needed
         var chapterDefaults = {
@@ -257,7 +264,17 @@
             onChapterExit: []
         };
         config.chapters = config.chapters.map(function (ch) {
-            return Object.assign({}, chapterDefaults, ch);
+            ch = Object.assign({}, chapterDefaults, ch);
+            // `layers` shorthand: a chapter may list custom layer ids (from
+            // sources.js) that should be visible only while it is active.
+            // Expands to onChapterEnter (fade in) / onChapterExit (fade out).
+            if (ch.layers && ch.layers.length > 0) {
+                ch.layers.forEach(function (layerId) {
+                    ch.onChapterEnter = ch.onChapterEnter.concat({ layer: layerId, opacity: 1, duration: 500 });
+                    ch.onChapterExit = ch.onChapterExit.concat({ layer: layerId, opacity: 0, duration: 500 });
+                });
+            }
+            return ch;
         });
 
         // Build a lookup map for O(1) chapter access in scroll handlers
@@ -269,6 +286,15 @@
             'center': 'centered',
             'right': 'righty',
             'full': 'fully'
+        };
+
+        // Camera animation pacing defaults. Any of these can be overridden
+        // per chapter by setting the same key inside `location` in config.js.
+        // speed 0.8 (vs MapLibre's 1.2 default) gives a calmer flight between
+        // these mostly-nearby chapters; curve 1.4 is close to the default arc.
+        var animationDefaults = {
+            flyTo: { speed: 0.8, curve: 1.4, essential: true },
+            easeTo: { duration: 1800, essential: true }
         };
 
         var layerTypes = {
@@ -460,19 +486,43 @@
                     break;
                 }
             }
-            map.addLayer({
-                'id': '3d-buildings',
-                'source': 'carto',
-                'source-layer': 'building',
-                'type': 'fill-extrusion',
-                'minzoom': 14,
-                'paint': {
-                    'fill-extrusion-color': '#8090a0',
-                    'fill-extrusion-height': ['*', ['get', 'render_height'], 1.8],
-                    'fill-extrusion-base': 0,
-                    'fill-extrusion-opacity': 0.85
-                }
-            }, labelLayer);
+            // The 'carto' vector source belongs to the CARTO basemap styles.
+            // If the style is swapped (e.g. MapTiler, whose equivalent source is
+            // usually 'openmaptiles'), skip rather than crash; adjust the source
+            // name here to restore 3D buildings on the new basemap.
+            if (map.getSource('carto')) {
+                map.addLayer({
+                    'id': '3d-buildings',
+                    'source': 'carto',
+                    'source-layer': 'building',
+                    'type': 'fill-extrusion',
+                    'minzoom': 14,
+                    'paint': {
+                        'fill-extrusion-color': '#8090a0',
+                        'fill-extrusion-height': ['*', ['get', 'render_height'], 1.8],
+                        'fill-extrusion-base': 0,
+                        'fill-extrusion-opacity': 0.85
+                    }
+                }, labelLayer);
+            }
+
+            // Custom sources and layers from sources.js (no-op while empty).
+            // Layers are inserted below the basemap's first label layer so
+            // place names stay legible above custom data.
+            if (typeof externalData !== 'undefined') {
+                (externalData.sources || []).forEach(function (src) {
+                    var def = { type: src.type };
+                    if (src.type === 'geojson') {
+                        def.data = src.url;
+                    } else {
+                        def.url = src.url;
+                    }
+                    map.addSource(src.name, def);
+                });
+                (externalData.layers || []).forEach(function (layer) {
+                    map.addLayer(layer, labelLayer);
+                });
+            }
 
             map.setLight({
                 anchor: 'viewport',
@@ -498,7 +548,8 @@
                     var chapter = chapterMap[response.element.id];
 
                     response.element.classList.add('active');
-                    map[chapter.mapAnimation || 'flyTo'](chapter.location);
+                    var animation = chapter.mapAnimation || 'flyTo';
+                    map[animation](Object.assign({}, animationDefaults[animation], chapter.location));
 
                     if (config.inset) {
                         insetMap.flyTo({ center: chapter.location.center, zoom: 11 });
@@ -565,7 +616,6 @@
             var bounds = map.getBounds();
             var coords = boundsJson.features[0].geometry.coordinates[0];
             coords[0][0] = coords[3][0] = coords[4][0] = bounds._sw.lng;
-            coords[0][1] = coords[1][1] = coords._sw ? bounds._sw.lat : bounds._sw.lat;
             coords[1][0] = coords[2][0] = bounds._ne.lng;
             coords[2][1] = coords[3][1] = bounds._ne.lat;
             coords[0][1] = coords[1][1] = coords[4][1] = bounds._sw.lat;

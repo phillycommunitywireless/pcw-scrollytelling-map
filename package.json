@@ -1,7 +1,7 @@
 {
-  "name": "maplibre-storymap",
+  "name": "pcw-scrollytelling-map",
   "version": "1.0.0",
-  "description": "A simple Node app to initialize a MapLibre Storymap server",
+  "description": "MapLibre scrollytelling map for Philly Community Wireless",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint build.js index.js config.js sources.js",
@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digidem/maplibre-storymap.git"
+    "url": "git+https://github.com/phillycommunitywireless/pcw-scrollytelling-map.git"
   },
-  "author": "Rudo Kemper",
+  "author": "Philly Community Wireless",
   "bugs": {
-    "url": "https://github.com/digidem/maplibre-storymap/issues"
+    "url": "https://github.com/phillycommunitywireless/pcw-scrollytelling-map/issues"
   },
-  "homepage": "https://github.com/digidem/maplibre-storymap#readme",
+  "homepage": "https://github.com/phillycommunitywireless/pcw-scrollytelling-map#readme",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.0.0"
+    "@eslint/js": "^9",
+    "eslint": "^9"
   }
 }
