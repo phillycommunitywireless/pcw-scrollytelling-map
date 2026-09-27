@@ -31,13 +31,14 @@ See [CONFIG.md](CONFIG.md) for the full schema.
 
 ## Adding a new chapter
 
-Add an object to the `chapters` array in `config.js`. Most fields have sensible defaults, so a minimal chapter only needs `id`, `title`, `image`, `description`, and `location`:
+Add an object to the `chapters` array in `config.js`. Most fields have sensible defaults, so a minimal chapter only needs `id`, `title`, `image`, `imageAlt`, `description`, and `location`:
 
 ```js
 {
     id: 'my-chapter',
     title: 'Chapter Title',
-    image: './images/photo.jpg',
+    image: './images/photo.webp',
+    imageAlt: 'What the photo shows, for screen readers.',
     description: 'Text describing this location.',
     location: {
         center: [-75.1350, 39.9830],
@@ -61,6 +62,7 @@ Add an object to the `chapters` array in `config.js`. Most fields have sensible 
 | `onChapterExit` | `[]` | Layer opacity changes on exit (see CONFIG.md) |
 
 **Tips:**
+- Save photos as `.webp`, about 1200px wide. Cards never display wider than that, and full-size phone photos slow the story down.
 - Use [Google Maps](https://maps.google.com) or [geojson.io](https://geojson.io) to find longitude/latitude coordinates.
 - `flyTo` creates a smooth, curved zoom transition -- best for larger geographic jumps. `easeTo` is a linear pan -- best for small nearby movements.
 
