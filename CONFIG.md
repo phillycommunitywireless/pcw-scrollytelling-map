@@ -45,6 +45,7 @@ Note: items in bold are **required**.
 
 - `title`: Section heading, displayed as an `h3`.
 - `image`: Path to an image (place files in `images/`).
+- `imageAlt`: A short description of the image for screen readers. Include it whenever there is an `image`.
 - `description`: Main story text. Renders as HTML, so links and formatting work.
 - `caption`: Image caption, displayed in italics.
 
@@ -67,7 +68,8 @@ Note: items in bold are **required**.
 {
     id: 'my-chapter',
     title: 'Chapter Title',
-    image: './images/photo.jpg',
+    image: './images/photo.webp',
+    imageAlt: 'What the photo shows.',
     description: 'What the reader should know about this location.',
     location: {
         center: [-75.1350, 39.9830],
