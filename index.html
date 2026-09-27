@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8' />
     <title>Philly Community Wireless Story Map</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta name='viewport' content='width=device-width,initial-scale=1' />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
@@ -63,6 +63,8 @@
             position: relative;
             z-index: 5;
             text-align: center;
+            /* White on the purple header; the dark card text was ~2:1 contrast here */
+            color: #fff;
             background: var(--header-bg);
             border-radius: 25px;
             border: 1px solid var(--header-border);
@@ -159,7 +161,8 @@
             line-height: 1.6em;
         }
 
-        .step div a {
+        .step div a,
+        #footer a {
             color: inherit;
             text-decoration-thickness: 2px;
         }
@@ -449,7 +452,10 @@
             scrollZoom: false,
             touchZoomRotate: false,
             maplibreLogo: false,
-            attributionControl: false
+            // OpenStreetMap and CARTO require visible credit. MapLibre shows it
+            // bottom-right; the (i) button collapses it. On phones the story
+            // cards cover it, so the footer repeats the credit (config.js).
+            attributionControl: { compact: true }
         });
 
         // Inset map
@@ -531,10 +537,19 @@
                 position: [1.5, 45, 80]
             });
 
-            // Inset map bounds tracking
+            // Inset map bounds tracking. The inset loads its own copy of the
+            // style and can finish after the main map; adding its bounds layer
+            // before then throws and would stop the scroll setup below.
             if (config.inset) {
-                map.on('move', getInsetBounds);
-                getInsetBounds();
+                var startInset = function () {
+                    map.on('move', getInsetBounds);
+                    getInsetBounds();
+                };
+                if (insetMap.isStyleLoaded()) {
+                    startInset();
+                } else {
+                    insetMap.once('load', startInset);
+                }
             }
 
             // Scrollama setup
